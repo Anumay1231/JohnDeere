@@ -1,4 +1,4 @@
-# 🚜 JD Dealership — GM Inference Dashboard
+# JD Dealership — GM Inference Dashboard
 
 **Live App:** [https://johndeere-ggfl75gs88ikngmj4psx6c.streamlit.app/](https://johndeere-ggfl75gs88ikngmj4psx6c.streamlit.app/)
 
