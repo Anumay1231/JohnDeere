@@ -4,7 +4,7 @@ app.py — JD Dealership Drag-and-Drop Executive Analytics
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import warnings
 
 import streamlit as st
@@ -183,7 +183,8 @@ def kpi(label, value, sub, kind="neutral", icon=""):
 # ──────────────────────────────────────────────────────────────
 # DRAG AND DROP UPLOADER
 # ──────────────────────────────────────────────────────────────
-ts = datetime.now().strftime("%d %b %Y  ·  %H:%M")
+IST = timezone(timedelta(hours=5, minutes=30))
+ts = datetime.now(IST).strftime("%d %b %Y  ·  %H:%M")
 
 st.markdown(f"""
 <div class="topbar">
