@@ -348,3 +348,61 @@ def load_billing_summary(billing_path, billing_2015_path):
     detail['district']      = detail['tehsil'].apply(map_district)
 
     return df_annual, df_billing_pivot, df_delivery_pivot, detail
+
+
+# ─────────────────────────────────────────────────────────────
+# PHASE 4: FINANCIAL RECONCILIATION
+# ─────────────────────────────────────────────────────────────
+
+def load_financial_recon(billing_path):
+    """
+    Scans through 40+ vendor/dealer ledger sheets in BILLING.xlsx
+    Returns a DataFrame with net positions (Receivable / Payable).
+    """
+    xl = pd.ExcelFile(billing_path)
+    exclude_sheets = ['Sheet1', 'Sheet2', 'Sheet3', 'BILLING DELIVERY', 'BOOKING']
+    
+    records = []
+    
+    for s in xl.sheet_names:
+        if s in exclude_sheets:
+            continue
+            
+        try:
+            # Most ledgers have their header on the second row
+            df = pd.read_excel(xl, sheet_name=s, header=1)
+            
+            # Find a column containing "BALANCE"
+            bal_cols = [c for c in df.columns if isinstance(c, str) and 'BALANCE' in c.upper()]
+            
+            if bal_cols:
+                bal_col = bal_cols[0]
+                # Drop rows where balance is NaN, take the last one
+                valid_bals = df[bal_col].dropna()
+                
+                if not valid_bals.empty:
+                    last_bal = valid_bals.iloc[-1]
+                    
+                    try:
+                        last_bal = float(last_bal)
+                    except (ValueError, TypeError):
+                        continue
+                        
+                    # Skip 0 balances to declutter
+                    if pd.notna(last_bal) and last_bal != 0:
+                        records.append({
+                            'Vendor': str(s).strip().title(),
+                            'Balance': last_bal,
+                            # Assumption: Positive balance in vendor ledger = Payable. Negative = Receivable.
+                            'Category': 'Payable' if last_bal > 0 else 'Receivable'
+                        })
+        except Exception:
+            pass
+            
+    df_recon = pd.DataFrame(records)
+    if not df_recon.empty:
+        # Absolute balance for magnitude sorting
+        df_recon['Abs_Balance'] = df_recon['Balance'].abs()
+        df_recon = df_recon.sort_values(by=['Category', 'Abs_Balance'], ascending=[True, False])
+        
+    return df_recon
