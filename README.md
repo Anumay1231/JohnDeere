@@ -8,7 +8,7 @@
 
 ### Live App (works on any phone, laptop, or tablet):
 
-> **https://anumay1231-johndeere.streamlit.app**
+> **https://johndeere-ggfl75gs88ikngmj4psx6c.streamlit.app/**
 
 Just open the link → drag your Excel files → get instant inferences.
 
